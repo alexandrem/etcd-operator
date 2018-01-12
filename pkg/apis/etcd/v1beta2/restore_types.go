@@ -39,12 +39,25 @@ type EtcdRestore struct {
 
 // RestoreSpec defines how to restore an etcd cluster from existing backup.
 type RestoreSpec struct {
-	// ClusterSpec defines the same spec that etcd operator will run later.
-	// using this spec, restore operator will prepare the seed that
-	// etcd operator will pick up later.
-	ClusterSpec ClusterSpec `json:"clusterSpec"`
+	// BackupStorageType is the type of the backup storage which is used as RestoreSource.
+	BackupStorageType BackupStorageType `json:"backupStorageType"`
 	// RestoreSource tells the where to get the backup and restore from.
 	RestoreSource `json:",inline"`
+	// EtcdCluster references an EtcdCluster resource whose metadata and spec
+	// will be used to create the new restored EtcdCluster CR.
+	// This reference EtcdCluster CR and all its resources will be deleted before the
+	// restored EtcdCluster CR is created.
+	EtcdCluster EtcdClusterRef `json:"etcdCluster"`
+}
+
+// EtcdCluster references an EtcdCluster resource whose metadata and spec
+// will be used to create the new restored EtcdCluster CR.
+// This reference EtcdCluster CR and all its resources will be deleted before the
+// restored EtcdCluster CR is created.
+type EtcdClusterRef struct {
+	// Name is the EtcdCluster resource name.
+	// This reference EtcdCluster must be present in the same namespace as the restore-operator
+	Name string `json:"name"`
 }
 
 type RestoreSource struct {
@@ -55,7 +68,7 @@ type RestoreSource struct {
 type S3RestoreSource struct {
 	// Path is the full s3 path where the backup is saved.
 	// The format of the path must be: "<s3-bucket-name>/<path-to-backup-file>"
-	// e.g: "etcd-backups/v1/default/example-etcd-cluster/3.2.10_0000000000000001_etcd.backup"
+	// e.g: "mybucket/etcd.backup"
 	Path string `json:"path"`
 
 	// The name of the secret object that stores the AWS credential and config files.
