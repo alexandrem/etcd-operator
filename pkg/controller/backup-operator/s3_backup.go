@@ -30,7 +30,7 @@ import (
 
 // TODO: replace this with generic backend interface for other options (PV, Azure)
 // handleS3 backups up etcd cluster to s3 and return s3 path for the backup file.
-func handleS3(kubecli kubernetes.Interface, s3 *api.S3BackupSource, clientTLSSecret, namespace) (string, error) {
+func handleS3(kubecli kubernetes.Interface, s *api.S3BackupSource, endpoints []string, clientTLSSecret, namespace string) (*api.BackupStatus, error) {
 	cli, err := s3factory.NewClientFromSecret(kubecli, namespace, s3.AWSEndpoint, s3.AWSSecret)
 
 	if err != nil {
